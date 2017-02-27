@@ -84,12 +84,10 @@ func (defaultsettings *DockercliLocalConfigDefault) ClientOptions() *docker_cli_
 }
 
 func (defaultsettings *DockercliLocalConfigDefault) DeployOptions() *handler_dockercli_stack_imported.DeployOptions {
-	// projectName, err := defaultsettings.settingWrapper.Get("Project")
-	// if err != nil {
-	// 	projectName = "default"
-	// }
-	projectName := "default"
-
+	projectName, err := defaultsettings.settingWrapper.Get("Project")
+	if err != nil {
+		projectName = "default"
+	}
 	return handler_dockercli_stack_imported.New_DeployOptions(
 		"", // bundlefile,
 		path.Join(defaultsettings.settings.ProjectRootPath, "docker-compose.yml"), // composefile,

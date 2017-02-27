@@ -37,10 +37,6 @@ type LocalBuilder struct {
 
 // Constructor for LocalBuilder
 func New_LocalBuilder(settings handler_local.LocalAPISettings, dockercliConfig DockercliLocalConfig) *LocalBuilder {
-	if dockercliConfig == nil {
-		dockercliConfig = &DockercliLocalConfigDefault{settings: settings}
-	}
-
 	return &LocalBuilder{
 		LocalBuilder:    *handler_local.New_LocalBuilder(settings),
 		settings:        settings,
