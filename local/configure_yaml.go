@@ -47,22 +47,50 @@ func (configYml *DockercliLocalConfigConfigWrapperYml) DockercliLocalConfig() Do
  */
 
 func (configYml *DockercliLocalConfigConfigWrapperYml) ClientOptions() *docker_cli_flags.ClientOptions {
-	return docker_cli_flags.NewClientOptions()
+	/**
+	 * @TODO check first for client options from yml somehow
+	 */
+
+	return configYml.DockercliLocalConfigDefault.ClientOptions()
 }
 
 func (configYml *DockercliLocalConfigConfigWrapperYml) DeployOptions() *handler_dockercli_stack_imported.DeployOptions {
-	return handler_dockercli_stack_imported.New_DeployOptions(
-		"",    // bundlefile,
-		"",    // composefile,
-		"",    // namespace,
-		false, // sendRegistryAuth,
-	)
+	configYml.safe()
+
+	var opts *handler_dockercli_stack_imported.DeployOptions
+	if &configYml.config != nil {
+		opts = configYml.config.DeployOptions()
+	}
+	if opts == nil {
+		opts = configYml.DockercliLocalConfigDefault.DeployOptions()
+	}
+	return opts
 }
 
 func (configYml *DockercliLocalConfigConfigWrapperYml) RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions {
-	return handler_dockercli_stack_imported.New_RemoveOptions(
-		"", // namespace,
-	)
+	configYml.safe()
+
+	var opts *handler_dockercli_stack_imported.RemoveOptions
+	if &configYml.config != nil {
+		opts = configYml.config.RemoveOptions()
+	}
+	if opts == nil {
+		opts = configYml.DockercliLocalConfigDefault.RemoveOptions()
+	}
+	return opts
+}
+
+func (configYml *DockercliLocalConfigConfigWrapperYml) PsOptions() *handler_dockercli_stack_imported.PsOptions {
+	configYml.safe()
+
+	var opts *handler_dockercli_stack_imported.PsOptions
+	if &configYml.config != nil {
+		opts = configYml.config.PsOptions()
+	}
+	if opts == nil {
+		opts = configYml.DockercliLocalConfigDefault.PsOptions()
+	}
+	return opts
 }
 
 func (configYml *DockercliLocalConfigConfigWrapperYml) IO() (io.ReadCloser, io.Writer, io.Writer) {
@@ -119,14 +147,98 @@ func (configYml *DockercliLocalConfigConfigWrapperYml) Save() error {
 
 // Wrapper YML struct for all components that could in the yml file
 type dockercliLocalConfigureYML struct {
-	DeployOptions dockercliLocalConfigureYML_DeployOptions `yml:"Deploy"`
+	Client dockercliLocalConfigureYML_Client `yml:"Client"`
+	Deploy dockercliLocalConfigureYML_Deploy `yml:"Deploy"`
+}
+
+// Convert this to DeployOptions
+func (ymlConfig *dockercliLocalConfigureYML) DeployOptions() *handler_dockercli_stack_imported.DeployOptions {
+	return ymlConfig.Deploy.DeployOptions()
+}
+
+// Convert this to RemoveOptions
+func (ymlConfig *dockercliLocalConfigureYML) RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions {
+	return ymlConfig.Deploy.RemoveOptions()
+}
+
+// Convert this to PSOptions
+func (ymlConfig *dockercliLocalConfigureYML) PsOptions() *handler_dockercli_stack_imported.PsOptions {
+	return ymlConfig.Deploy.PsOptions()
+}
+
+// YML holding struct for client options,
+type dockercliLocalConfigureYML_Client struct {
+	Debug    bool   `yaml:"Debug"`
+	LogLevel string `yaml:"Debug"`
+
+	Hosts     []string `yaml:"Debug"`
+	TLS       bool     `yaml:"Debug"`
+	TLSVerify bool     `yaml:"Debug"`
+
+	CAFile             string `yaml:"Debug"`
+	CertFile           string `yaml:"Debug"`
+	KeyFile            string `yaml:"KeyFile"`
+	InsecureSkipVerify bool   `yaml:"InsecureSkipVerify"`
+
+	TrustKey  string `yaml:"TrustKey"`
+	ConfigDir string `yaml:"ConfigDir"`
+	Version   bool   `yaml:"Version"`
+}
+
+// Convert this to DeployOptions
+func (ymlClient *dockercliLocalConfigureYML_Client) ClientOptions() *docker_cli_flags.ClientOptions {
+	common := docker_cli_flags.NewCommonOptions()
+	common.Debug = ymlClient.Debug
+	common.TLSVerify = ymlClient.TLSVerify
+	common.TrustKey = ymlClient.TrustKey
+
+	if ymlClient.LogLevel != "" {
+		common.LogLevel = ymlClient.LogLevel
+	}
+	if len(ymlClient.LogLevel) > 0 {
+		common.Hosts = append(common.Hosts, ymlClient.Hosts...)
+	}
+
+	return &(docker_cli_flags.ClientOptions{
+		Common:    common,
+		ConfigDir: ymlClient.ConfigDir,
+		Version:   ymlClient.Version,
+	})
 }
 
 // YML holding struct for deploy options, mainly used for the stack handler deploy orchestration
 // See github.com/docker/docker/cli/command/stack  (deploy.go) for more understanding
-type dockercliLocalConfigureYML_DeployOptions struct {
+type dockercliLocalConfigureYML_Deploy struct {
 	Bundlefile       string `yaml:"Bundlefile"`
 	Composefile      string `yaml:"Composefile"`
 	Namespace        string `yaml:"Namespace"`
 	SendRegistryAuth bool   `yaml:"SendRegistryAuth"`
+}
+
+// Convert this to DeployOptions
+func (ymlDeploy *dockercliLocalConfigureYML_Deploy) DeployOptions() *handler_dockercli_stack_imported.DeployOptions {
+	return handler_dockercli_stack_imported.New_DeployOptions(
+		ymlDeploy.Bundlefile,
+		ymlDeploy.Composefile,
+		ymlDeploy.Namespace,
+		ymlDeploy.SendRegistryAuth,
+	)
+}
+
+// Convert this to RemoveOptions
+func (ymlDeploy *dockercliLocalConfigureYML_Deploy) RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions {
+	return handler_dockercli_stack_imported.New_RemoveOptions(
+		ymlDeploy.Namespace,
+	)
+}
+
+// Convert this to PsOptions
+func (ymlDeploy *dockercliLocalConfigureYML_Deploy) PsOptions() *handler_dockercli_stack_imported.PsOptions {
+	return handler_dockercli_stack_imported.New_PsOptions(
+		false,
+		ymlDeploy.Namespace,
+		false,
+		false,
+		"",
+	)
 }

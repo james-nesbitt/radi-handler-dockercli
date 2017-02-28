@@ -63,3 +63,10 @@ func (stackBase *DockercliStackOperationBase) RemoveOptionsProperty() *Dockercli
 	remOptsProp.Set(*remOpts)
 	return &remOptsProp
 }
+
+func (stackBase *DockercliStackOperationBase) PsOptionsProperty() *DockercliStackPsOptionsProperty {
+	remOpts := stackBase.DockercliStackConfig().PsOptions()
+	remOptsProp := DockercliStackPsOptionsProperty{}
+	remOptsProp.Set(*remOpts)
+	return &remOptsProp
+}

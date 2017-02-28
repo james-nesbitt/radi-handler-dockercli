@@ -74,6 +74,8 @@ func (builder *LocalBuilder) Activate(implementations api_builder.Implementation
 
 	for _, implementation := range implementations.Order() {
 		switch implementation {
+		case "monitor":
+			builder.build_Monitor(localBase, dockerCLIBase, stackBase)
 		case "orchestrate":
 			builder.build_Orchestrate(localBase, dockerCLIBase, stackBase)
 		default:
@@ -158,6 +160,24 @@ func (builder *LocalBuilder) build_Orchestrate(localBase *handler_local.LocalHan
 		//builder.Orchestrate = local_orchestration.OrchestrateWrapper()
 
 		log.Debug("DockerCLI:localBuilder: Built Orchestrate handler")
+	}
+
+	return res
+}
+
+// Build and add a handler for orchestration
+func (builder *LocalBuilder) build_Monitor(localBase *handler_local.LocalHandler_Base, dockerCLIBase *handler_dockercli.DockercliHandlerBase, stackBase *handler_dockercli_stack.DockercliStackHandlerBase) api_result.Result {
+	local_monitor := New_DockercliMonitorHandler(localBase, dockerCLIBase, stackBase)
+
+	res := local_monitor.Validate()
+	<-res.Finished()
+
+	if res.Success() {
+		builder.AddHandler(api_handler.Handler(local_monitor))
+		// Get an orchestrate wrapper for other handlers
+		//builder.Monitor = local_monitor.OrchestrateWrapper()
+
+		log.Debug("DockerCLI:localBuilder: Built Monitor handler")
 	}
 
 	return res

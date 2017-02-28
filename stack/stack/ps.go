@@ -21,6 +21,18 @@ type PsOptions struct {
 	format    string
 }
 
+func New_PsOptions(noTrunc bool, namespace string, noResolve bool, quiet bool, format string) *PsOptions {
+	filter := opts.NewFilterOpt()
+	return &PsOptions{
+		noTrunc:   noTrunc,
+		namespace: namespace,
+		noResolve: noResolve,
+		quiet:     quiet,
+		format:    format,
+		filter:    filter,
+	}
+}
+
 func RunPS(dockerCli *command.DockerCli, opts PsOptions) error {
 	namespace := opts.namespace
 	client := dockerCli.Client()

@@ -28,6 +28,7 @@ type DockercliLocalConfig interface {
 	 */
 	DeployOptions() *handler_dockercli_stack_imported.DeployOptions
 	RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions
+	PsOptions() *handler_dockercli_stack_imported.PsOptions
 }
 
 /**
@@ -51,6 +52,10 @@ func (nullsettings *DockercliLocalConfigNull) DeployOptions() *handler_dockercli
 
 func (nullsettings *DockercliLocalConfigNull) RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions {
 	return handler_dockercli_stack_imported.New_RemoveOptions("")
+}
+
+func (nullsettings *DockercliLocalConfigNull) PsOptions() *handler_dockercli_stack_imported.PsOptions {
+	return handler_dockercli_stack_imported.New_PsOptions(false, "", false, false, "")
 }
 
 func (nullsettings *DockercliLocalConfigNull) IO() (io.ReadCloser, io.Writer, io.Writer) {
@@ -97,14 +102,28 @@ func (defaultsettings *DockercliLocalConfigDefault) DeployOptions() *handler_doc
 }
 
 func (defaultsettings *DockercliLocalConfigDefault) RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions {
-	// projectName, err := defaultsettings.settingWrapper.Get("Project")
-	// if err != nil {
-	// 	projectName = "default"
-	// }
-	projectName := "default"
+	projectName, err := defaultsettings.settingWrapper.Get("Project")
+	if err != nil {
+		projectName = "default"
+	}
 
 	return handler_dockercli_stack_imported.New_RemoveOptions(
 		projectName, // namespace,
+	)
+}
+
+func (defaultsettings *DockercliLocalConfigDefault) PsOptions() *handler_dockercli_stack_imported.PsOptions {
+	projectName, err := defaultsettings.settingWrapper.Get("Project")
+	if err != nil {
+		projectName = "default"
+	}
+
+	return handler_dockercli_stack_imported.New_PsOptions(
+		false,
+		projectName,
+		false,
+		false,
+		"",
 	)
 }
 

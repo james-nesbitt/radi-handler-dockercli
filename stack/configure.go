@@ -11,4 +11,5 @@ import (
 type DockercliStackConfig interface {
 	DeployOptions() *handler_dockercli_stack_imported.DeployOptions
 	RemoveOptions() *handler_dockercli_stack_imported.RemoveOptions
+	PsOptions() *handler_dockercli_stack_imported.PsOptions
 }
