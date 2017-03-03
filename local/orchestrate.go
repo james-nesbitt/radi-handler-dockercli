@@ -14,16 +14,16 @@ import (
  */
 
 // Local Handler for orchestration using docker cli
-type DockercliOrchestrateHandler struct {
+type OrchestrateHandler struct {
 	handler_local.LocalHandler_Base
 	DockercliLocalHandlerBase
 	handler_dockercli.DockercliHandlerBase
 	handler_dockercli_stack.DockercliStackHandlerBase
 }
 
-// Constructor for DockercliOrchestrateHandler
-func New_DockercliOrchestrateHandler(localBase *handler_local.LocalHandler_Base, dockerCLIBase *handler_dockercli.DockercliHandlerBase, stackBase *handler_dockercli_stack.DockercliStackHandlerBase) *DockercliOrchestrateHandler {
-	return &DockercliOrchestrateHandler{
+// Constructor for OrchestrateHandler
+func New_OrchestrateHandler(localBase *handler_local.LocalHandler_Base, dockerCLIBase *handler_dockercli.DockercliHandlerBase, stackBase *handler_dockercli_stack.DockercliStackHandlerBase) *OrchestrateHandler {
+	return &OrchestrateHandler{
 		LocalHandler_Base:         *localBase,
 		DockercliHandlerBase:      *dockerCLIBase,
 		DockercliStackHandlerBase: *stackBase,
@@ -31,17 +31,17 @@ func New_DockercliOrchestrateHandler(localBase *handler_local.LocalHandler_Base,
 }
 
 // Validate the Base Handler
-func (base *DockercliOrchestrateHandler) Id() string {
+func (base *OrchestrateHandler) Id() string {
 	return "dockercli.orchestrate"
 }
 
 // Validate the Base Handler
-func (base *DockercliOrchestrateHandler) Validate() api_result.Result {
+func (base *OrchestrateHandler) Validate() api_result.Result {
 	return api_result.MakeSuccessfulResult()
 }
 
 // Validate the Base Handler
-func (base *DockercliOrchestrateHandler) Operations() api_operation.Operations {
+func (base *OrchestrateHandler) Operations() api_operation.Operations {
 	ops := api_operation.New_SimpleOperations()
 
 	// use a single base operation

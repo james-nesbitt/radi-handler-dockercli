@@ -74,6 +74,8 @@ func (builder *LocalBuilder) Activate(implementations api_builder.Implementation
 
 	for _, implementation := range implementations.Order() {
 		switch implementation {
+		case "command":
+			builder.build_Command(localBase, dockerCLIBase, stackBase)
 		case "monitor":
 			builder.build_Monitor(localBase, dockerCLIBase, stackBase)
 		case "orchestrate":
@@ -149,7 +151,7 @@ func (builder *LocalBuilder) base_DockercliStackHandlerBase(dockercliConfig Dock
 
 // Build and add a handler for orchestration
 func (builder *LocalBuilder) build_Orchestrate(localBase *handler_local.LocalHandler_Base, dockerCLIBase *handler_dockercli.DockercliHandlerBase, stackBase *handler_dockercli_stack.DockercliStackHandlerBase) api_result.Result {
-	local_orchestration := New_DockercliOrchestrateHandler(localBase, dockerCLIBase, stackBase)
+	local_orchestration := New_OrchestrateHandler(localBase, dockerCLIBase, stackBase)
 
 	res := local_orchestration.Validate()
 	<-res.Finished()
@@ -165,9 +167,28 @@ func (builder *LocalBuilder) build_Orchestrate(localBase *handler_local.LocalHan
 	return res
 }
 
-// Build and add a handler for orchestration
+// Build and add a handler for monitoring
 func (builder *LocalBuilder) build_Monitor(localBase *handler_local.LocalHandler_Base, dockerCLIBase *handler_dockercli.DockercliHandlerBase, stackBase *handler_dockercli_stack.DockercliStackHandlerBase) api_result.Result {
-	local_monitor := New_DockercliMonitorHandler(localBase, dockerCLIBase, stackBase)
+	local_monitor := New_MonitorHandler(localBase, dockerCLIBase, stackBase)
+
+	res := local_monitor.Validate()
+	<-res.Finished()
+
+	if res.Success() {
+		builder.AddHandler(api_handler.Handler(local_monitor))
+		// Get an orchestrate wrapper for other handlers
+		//builder.Monitor = local_monitor.OrchestrateWrapper()
+
+		log.Debug("DockerCLI:localBuilder: Built Monitor handler")
+	}
+
+	return res
+}
+
+// Build and add a handler for commands
+func (builder *LocalBuilder) build_Command(localBase *handler_local.LocalHandler_Base, dockerCLIBase *handler_dockercli.DockercliHandlerBase, stackBase *handler_dockercli_stack.DockercliStackHandlerBase) api_result.Result {
+	local_monitor := New_CommandHandler(localBase, dockerCLIBase, stackBase)
+	local_monitor.SetConfigWrapper(builder.ConfigWrapper())
 
 	res := local_monitor.Validate()
 	<-res.Finished()

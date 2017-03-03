@@ -211,6 +211,8 @@ func createNetworks(
 		}
 
 		fmt.Fprintf(dockerCli.Out(), "Creating network %s\n", name)
+		createOpts.Internal = true
+		createOpts.Attachable = true
 		if _, err := client.NetworkCreate(ctx, name, createOpts); err != nil {
 			return err
 		}
